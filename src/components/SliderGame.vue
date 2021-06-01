@@ -11,12 +11,16 @@ import {reshape} from '../utils/Utilities.js';
 export default {
     props:{
         pattern: Array,
+        loaded: {
+            type: Boolean,
+            default: false
+        }
     },
     data () {
         return {
             instance: {},
             draw: new PixiDraw(),
-            structure: randomizeStructure(this.pattern),
+            structure: this.loaded ? this.pattern : randomizeStructure(this.pattern),
             action: new PixiAction(),
             utils: new PixiUtils(),
             colors: [0xff0000, 0x00ff00, 0x0000ff, 0xf00f00, 0x0f00f0, 0x00f00f, 0xffff00, 0xff00ff, 0x00ffff],
@@ -78,6 +82,12 @@ export default {
         },
         createBGSquare(index, space){
             return this.draw.rect({fill: this.colors[index], fillOpacity: 1, strokeWidth: 0, strokeOpacity: 0, stroke: 0xffffff, width: space, height: space, x: 0, y: 0})
+        },
+        updateGame(levelCheck){
+            const pieceStatus = this.pieces.map(piece => piece.status);
+            const gameState = reshape(pieceStatus, this.structure.length);
+            const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
+            this.$emit('updated', {gameState, levelComplete});
         }
     },
     mounted () {
@@ -176,17 +186,13 @@ export default {
                             full.visible = this.dragGroup[i].status == 1 || this.dragGroup[i].status != ' ';
                         }
                     }
-                    const gameState = this.pieces.map(piece => piece.status);
-                    if(checkForWin(reshape(gameState, this.structure.length), this.structure[0][0].split('-').length > 1)){
-                        this.$emit('level-complete');
-                    }
-                    
+                    this.updateGame(true);
                 });
                 h++;
             }
             v++;
         }
-        
+        this.updateGame();
         
     }
 }
