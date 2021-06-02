@@ -12,7 +12,7 @@
             v-if="saving"
             cta="save"
             @cta-clicked="saveCurrentGame"
-            @dismiss="saving = false"
+            @dismiss="saving = false;gameName = ''"
         >
             <input type="text" v-model="gameName" />
         </ModalWindow>
@@ -22,6 +22,20 @@
         >
             <GameLoader @game-selected="gameSelected" />
         </ModalWindow>
+        <YesNoModal
+            v-if="showOverwriteWarning"
+            @yes="overwrite"
+            @no="showOverwriteWarning = false;gameName = ''"
+        >
+            You already have a game with the name ({{gameName}}). Do you want to replace it?
+        </YesNoModal>
+        <YesNoModal
+            v-if="showLostProgressWarning"
+            @yes="setCurrentGame"
+            @no="showLostProgressWarning = false;"
+        >
+            You have not saved your current game. Do you want to continue?
+        </YesNoModal>
     </div>
 </template>
 
@@ -31,13 +45,15 @@
 import {createLevel} from '../utils/GameLogic.js';
 import SliderGame from '../components/SliderGame.vue';
 import ModalWindow from '../components/ModalWindow.vue';
+import YesNoModal from '../components/YesNoModal.vue';
 import GameLoader from '../components/GameLoader.vue';
 import {mapState, mapActions} from 'vuex';
 export default {
     components: {
         SliderGame,
         ModalWindow,
-        GameLoader
+        GameLoader,
+        YesNoModal
     },
     data () {
         return {
@@ -48,11 +64,15 @@ export default {
             hasSave: false,
             saving: false,
             gameName: '',
-            loading: false
+            loading: false,
+            showOverwriteWarning: false,
+            showLostProgressWarning: false,
+            gameToLoad: {},
+            saved: true
         }
     },
     computed: {
-        ...mapState(['currentLevel', 'currentPattern', 'currentBadges'])
+        ...mapState(['currentLevel', 'currentPattern', 'currentBadges', 'savedGames'])
     },
     methods: {
         ...mapActions(['setGameData', 'hasSavedGame', 'loadGameData', 'saveGame']),
@@ -61,21 +81,49 @@ export default {
                 alert('win');
                 this.level++;
             }
+            this.saved = e.setup;
+            
             this.setGameData({currentPattern: e.gameState, currentLevel: this.level, currentBadges: this.badges});
         },
         saveCurrentGame(){
-            this.saveGame(this.gameName);
+            if(this.savedGames[this.gameName]){
+                this.showOverwriteWarning = true;
+            }
+            else{
+                this.saveGame(this.gameName);
+                this.saved = true;
+                this.gameName = '';
+            }
             this.saving = false;
         },
         gameSelected(e){
+            
+            this.gameToLoad = e;
+            if(this.saved){
+                this.setCurrentGame();
+            }
+            else{
+                this.showLostProgressWarning = true;
+            }
+            this.loading = false;
+            
+            
+        },
+        setCurrentGame(game){
             this.selectedPattern = null;
             setTimeout(() => {
-                this.selectedPattern = e.currentPattern;
-                this.level = e.currentLevel;
-                this.badges = e.currentBadges;
-                this.loading = false;
+                this.selectedPattern = game ? game.currentPattern : this.gameToLoad.currentPattern;
+                this.level = game ? game.currentLevel : this.gameToLoad.currentLevel;
+                this.badges = game ? game.currentBadges : this.gameToLoad.currentBadges;
+                this.showLostProgressWarning = false;
             }, 10);
             
+        },
+        overwrite(){
+            this.saveGame(this.gameName);
+            this.saved = true;
+            this.gameName = '';
+            this.showOverwriteWarning = false;
         }
     },
     created(){

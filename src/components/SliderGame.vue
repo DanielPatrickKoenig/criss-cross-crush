@@ -87,7 +87,7 @@ export default {
             const pieceStatus = this.pieces.map(piece => piece.status);
             const gameState = reshape(pieceStatus, this.structure.length);
             const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
-            this.$emit('updated', {gameState, levelComplete});
+            this.$emit('updated', {gameState, levelComplete, setup: !levelCheck});
         }
     },
     mounted () {

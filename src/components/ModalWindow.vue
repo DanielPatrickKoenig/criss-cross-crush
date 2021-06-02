@@ -4,7 +4,10 @@
           <slot>
               WINDOW CONTENT
           </slot>
-          <div class="navigation">
+          <div 
+            class="navigation"
+            v-if="cta || closable"
+          >
               <button v-if="cta" @click="ctaClicked">{{cta}}</button>
               <button v-if="closable" @click="close">{{cta ? 'cancel' : 'close'}}</button>
           </div>
