@@ -8,6 +8,19 @@
   </div>
 </template>
 
+<script>
+import { mapActions } from 'vuex'
+export default {
+    methods: {
+      ...mapActions(['loadGames'])
+    },
+    created () {
+      this.loadGames();
+    }
+}
+</script>
+
+
 <style lang="css">
 @import "./scss/partials/_vicky.css";
 </style>
