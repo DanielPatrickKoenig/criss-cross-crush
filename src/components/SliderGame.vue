@@ -6,8 +6,9 @@
 
 <script>
 import {PixiInstance, PixiDraw, PixiUtils, PixiAction} from '../utils/PixiManager.js';
-import {getPiecesByProperty, randomizeStructure, checkForWin} from '../utils/GameLogic.js';
-import {reshape} from '../utils/Utilities.js';
+import {getPiecesByProperty, randomizeStructure, scanBoard, updatedBoard} from '../utils/GameLogic.js';
+import {flatten, reshape} from '../utils/Utilities.js';
+import {TweenLite} from 'gsap';
 export default {
     props:{
         pattern: Array,
@@ -23,7 +24,7 @@ export default {
             structure: this.loaded ? this.pattern : randomizeStructure(this.pattern),
             action: new PixiAction(),
             utils: new PixiUtils(),
-            colors: [0xff0000, 0x00ff00, 0x0000ff, 0xf00f00, 0x0f00f0, 0x00f00f, 0xffff00, 0xff00ff, 0x00ffff],
+            colors: [0xff0000, 0x00ff00, 0x0000ff, 0xcccccc, 0x999999, 0x666666, 0xffff00, 0xff00ff, 0x00ffff],
             dragger: null,
             dragCycles: 0,
             dragCycleMax: 15,
@@ -83,14 +84,54 @@ export default {
         createBGSquare(index, space){
             return this.draw.rect({fill: this.colors[index], fillOpacity: 1, strokeWidth: 0, strokeOpacity: 0, stroke: 0xffffff, width: space, height: space, x: 0, y: 0})
         },
-        updateGame(levelCheck){
-            const pieceStatus = this.pieces.map(piece => piece.status);
-            const gameState = reshape(pieceStatus, this.structure.length);
-            const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
-            this.$emit('updated', {gameState, levelComplete, setup: !levelCheck});
+        updateGame(scope, move){
+            // const pieceStatus = this.pieces.map(piece => piece.status);
+            // const gameState = reshape(pieceStatus, this.structure.length);
+            // const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
+            // this.$emit('updated', {gameState, setup: !move});
+            if(move){
+                const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length));
+                const flatBoard = flatten(updatedBoard.updatedStructure);
+                const flattenedDropMatrix = flatten(updatedBoard.dropMatrix);
+                console.log(flattenedDropMatrix);
+                const space = (scope.boardSize.width - (scope.boardBorder * 2)) / scope.structure[0].length;
+                let removedBlocks = false;
+                let maxSpeed = 500
+                for(let i = 0; i < scope.pieces.length; i++){
+                    scope.pieces[i].children[1].removeChild(scope.pieces[i].children[1].children[0]);
+                    scope.pieces[i].children[1].addChild(scope.createBGSquare(Number(flatBoard[i].split('-')[0]), space));
+                    scope.pieces[i].status = flatBoard[i];
+                    if(flattenedDropMatrix[i] !== 0){
+                        const previousPosition = scope.pieces[i].y;
+                        if(flattenedDropMatrix[i] > 0){
+                            scope.pieces[i].y -= space * flattenedDropMatrix[i];
+                        }
+                        else {
+                            scope.pieces[i].y = scope.originPoint.y + (space * flattenedDropMatrix[i]);
+                        }
+                        // const targetProps = !foundFirst ? {y: previousPosition, onComplete: scope.updateGame, onCompleteParams: [scope, move]} : {y: previousPosition};
+                        
+                        const targetProps = {y: previousPosition};
+                        TweenLite.to(scope.pieces[i], maxSpeed / 1000, targetProps);
+                        
+                        removedBlocks = true;
+                    }
+                }
+                if(removedBlocks){
+                    setTimeout(() => {scope.updateGame(scope, move)}, maxSpeed + 10);
+                }
+                
+                
+            }
+            
+        },
+        evaluateBoard(gameState){
+            const targetedBlocks = scanBoard([[true, false], [false, true]], gameState, gameState.length);
+            return updatedBoard(targetedBlocks, gameState);
         }
     },
     mounted () {
+        
         this.instance = new PixiInstance(this.$refs.pixiTarget, this.boardSize.width, this.boardSize.height, true);
         let h = 0;
         let v = 0;
@@ -173,7 +214,7 @@ export default {
                         const sortedDragGroup = dragPragPropertyList.sort((a, b) => (a[sortProp] > b[sortProp]) ? 1 : -1);
                         for(let i = 0; i < this.dragGroup.length; i++){
                             this.dragGroup[i].status = sortedDragGroup[i].status;
-                            console.log(this.dragGroup[i].status);
+                            // console.log(this.dragGroup[i].status);
                             this.dragGroup[i].x = this.startCenters[i].x - (space / 2);
                             this.dragGroup[i].y = this.startCenters[i].y - (space / 2);
                             const full = this.dragGroup[i].children[1];
@@ -186,13 +227,13 @@ export default {
                             full.visible = this.dragGroup[i].status == 1 || this.dragGroup[i].status != ' ';
                         }
                     }
-                    this.updateGame(true);
+                    this.updateGame(this, true);
                 });
                 h++;
             }
             v++;
         }
-        this.updateGame();
+        this.updateGame(this);
         
     }
 }

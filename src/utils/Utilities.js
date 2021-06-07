@@ -50,4 +50,15 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
-export {shuffle, reshape, getParameterByName, flatten};
+
+function transposeAxis(list){
+    let transposedList = [];
+    for(let i = 0; i < list.length; i++){
+        transposedList.push([]);
+        for(let j = 0; j < list[i].length; j++){
+            transposedList[i].push(list[j][i]);
+        }
+    }
+    return transposedList;
+}
+export {shuffle, reshape, getParameterByName, flatten, transposeAxis};

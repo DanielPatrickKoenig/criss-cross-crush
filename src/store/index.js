@@ -3,12 +3,12 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-const savedGamesID = 'gridslider_2_saved_games_d';
+const savedGamesID = 'criss_cross_crush_token_3';
 const gameMenifestTag = `${savedGamesID}_manifest`;
 const levelTag = `${savedGamesID}_level`;
 const badjesTag = `${savedGamesID}_badges`;
 const patternTag = `${savedGamesID}_pattern`;
-const baseLevel = 3;
+const baseLevel = 9;
 
 export default new Vuex.Store({
   state: {

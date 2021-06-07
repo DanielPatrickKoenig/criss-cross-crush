@@ -58,7 +58,7 @@ export default {
     data () {
         return {
             selectedPattern: null,
-            level: 3,
+            level: 9,
             badges: [],
             useSymbols: false,
             hasSave: false,
@@ -132,6 +132,9 @@ export default {
     async mounted () {
         this.hasSave = await this.hasSavedGame();
         this.selectedPattern = this.hasSave ? this.currentPattern : createLevel(this.level, this.useSymbols); 
+        // const targetedBlocks = scanBoard([[true, false], [false, true]], this.selectedPattern, this.level);
+        // console.log(updatedBoard(targetedBlocks, this.selectedPattern));
+        // console.log(findPattern([[true, false], [false, true]], this.selectedPattern, '2'));
     }
 }
 </script>
