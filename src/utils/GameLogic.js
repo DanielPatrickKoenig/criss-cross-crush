@@ -6,6 +6,93 @@ const Directions = {
     DOWN: 1
 }
 
+const patterns = [
+    [
+        [true, false], 
+        [false, true]
+    ],
+    [
+        [false, true], 
+        [true, false]
+    ],
+    [
+        [true, false], 
+        [true, true]
+    ],
+    [
+        [true, true], 
+        [true, true]
+    ],
+    [
+        [true, true, true], 
+        [true, true, false]
+    ],
+    [
+        [true, true, true], 
+        [false, true, true]
+    ],
+    [
+        [false, true, true], 
+        [true, true, true]
+    ],
+    [
+        [true, true, false], 
+        [true, true, true]
+    ],
+    [
+        [false, true, false], 
+        [true, true, true]
+    ],
+    [
+        [true, false, true], 
+        [true, true, true]
+    ],
+    [
+        [true, true, true], 
+        [true, true, true]
+    ],
+    [
+        [true, true, true], 
+        [true, true, true], 
+        [true, true, true]
+    ],
+    [
+        [true, true, true], 
+        [true, false, true], 
+        [true, true, true]
+    ],
+    [
+        [true, false, true], 
+        [true, true, true], 
+        [true, true, true]
+    ],
+    [
+        [true, false, true], 
+        [true, false, true], 
+        [true, true, true]
+    ],
+    [
+        [false, false, true], 
+        [false, false, true], 
+        [true, true, true]
+    ],
+    [
+        [true, false, false], 
+        [true, false, false], 
+        [true, true, true]
+    ],
+    [
+        [true, false, false], 
+        [true, true, false], 
+        [true, true, true]
+    ],
+    [
+        [false, false, true], 
+        [true, true, false], 
+        [true, true, true]
+    ]
+]
+
 function createLevel(difficulty, symbols) {
     return range(0, difficulty).map(index => symbols ? range(0, difficulty).map(item => `${item.toString()}-${index.toString()}`) : range(0, difficulty).map(item => `${item}`));
 }
@@ -106,12 +193,6 @@ function cellsToRemove(row, column, pattern){
 
 function scanBoard(pattern, structure, level){
     const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
-    // let startBlocks = [[1,2,3],[4,5,6],[7,8,9]];
-    // console.log(startBlocks);
-    // let t1 = transposeAxis(startBlocks);
-    // console.log(t1);
-    // let t2 = transposeAxis(t1);
-    // console.log(t2);
     return uniq(list.map(item => JSON.stringify(item))).map(item => JSON.parse(item));
 }
 
@@ -153,7 +234,7 @@ function updatedBoard(targetedBlocks, structure){
     let transposed = transposeAxis(structure);
     const dropMatrix = getDropMatrix(targetedBlocks, transposed);
     let filteredTransposed = transposed.map((item1, index1) => item1.filter((item2, index2) => !shouldRemoveBlock(targetedBlocks, index2, index1)));
-    let removals = filteredTransposed.map(item => 9 - item.length);
+    let removals = filteredTransposed.map(item => structure.length - item.length);
     for (let i = 0; i < removals.length; i++) {
         for(let j = 0; j < removals[i]; j++) {
             filteredTransposed[i].splice(0, 0, Math.floor(Math.random() * removals.length).toString());
@@ -162,4 +243,4 @@ function updatedBoard(targetedBlocks, structure){
     return {updatedStructure: transposeAxis(filteredTransposed), dropMatrix};
 }
 
-export {getPiecesByProperty, randomizeStructure, Directions, createLevel, checkForWin, scanBoard, updatedBoard};
+export {getPiecesByProperty, randomizeStructure, Directions, createLevel, checkForWin, scanBoard, updatedBoard, patterns};

@@ -15,6 +15,10 @@ export default {
         loaded: {
             type: Boolean,
             default: false
+        },
+        match: {
+            type: String,
+            required: true
         }
     },
     data () {
@@ -42,8 +46,15 @@ export default {
             minimumMoveDistance: 0,
             moving: false,
             tappedCell: {row: -1, column: -1},
-            lastTapped: {row: -1, column: -1}
+            lastTapped: {row: -1, column: -1},
+            patternToMatch: JSON.parse(this.match)
         }
+    },
+    watch: {
+        match () {
+            this.patternToMatch = JSON.parse(this.match);
+        }
+
     },
     methods: {
         // snap(){
@@ -126,7 +137,7 @@ export default {
             
         },
         evaluateBoard(gameState){
-            const targetedBlocks = scanBoard([[true, false], [false, true]], gameState, gameState.length);
+            const targetedBlocks = scanBoard(this.patternToMatch, gameState, gameState.length);
             return updatedBoard(targetedBlocks, gameState);
         }
     },
