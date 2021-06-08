@@ -1,22 +1,24 @@
 <template>
     <div class="game-page">
-        <div style="display:flex;flex-wrap:wrap;">
-            <button
-                v-for="(pattern, i) in patterns" 
-                :style="`margin:4px;opacity:${acivePattern === pattern ? 1 : .5}`"
-                :key="i"
-                @click="patternClicked(pattern)"
-            >
-                <PatternPerview 
-                    :pattern="pattern"
-                />
-            </button>
+        <div>
+            <div style="display:flex;flex-wrap:wrap;"><button v-for="(group, key, i) in patterns" :key="i" @click="patternClicked(group)">{{key}}</button></div>
+            <div style="display:flex;flex-wrap:wrap;">
+                <div
+                    v-for="(pattern, i) in acivePatterns" 
+                    :style="'margin:4px;'"
+                    :key="i"
+                >
+                    <PatternPerview 
+                        :pattern="pattern"
+                    />
+                </div>
+            </div>
         </div>
         <SliderGame 
             v-if="selectedPattern" 
             :pattern="selectedPattern" 
             :loaded="hasSave"
-            :match="patternToMatch"
+            :matches="patternsToMatch"
             @updated="onUpdated"
         />
         <button @click="saving = true">save game</button>
@@ -74,6 +76,7 @@ export default {
         return {
             selectedPattern: null,
             level: 9,
+            blocks: 3,
             badges: [],
             useSymbols: false,
             hasSave: false,
@@ -85,20 +88,20 @@ export default {
             gameToLoad: {},
             saved: true,
             patterns,
-            acivePattern: patterns[2]
+            acivePatterns: patterns.blocks_3
         }
     },
     computed: {
         ...mapState(['currentLevel', 'currentPattern', 'currentBadges', 'savedGames']),
-        patternToMatch () {
-            return JSON.stringify(this.acivePattern);
+        patternsToMatch () {
+            return JSON.stringify(this.acivePatterns);
         },
     },
     methods: {
         ...mapActions(['setGameData', 'hasSavedGame', 'loadGameData', 'saveGame']),
         patternClicked (e) {
             console.log(e);
-            this.acivePattern = e;
+            this.acivePatterns = e;
         },
         onUpdated(e){
             if(e.levelComplete){

@@ -16,7 +16,7 @@ export default {
             type: Boolean,
             default: false
         },
-        match: {
+        matches: {
             type: String,
             required: true
         }
@@ -47,12 +47,12 @@ export default {
             moving: false,
             tappedCell: {row: -1, column: -1},
             lastTapped: {row: -1, column: -1},
-            patternToMatch: JSON.parse(this.match)
+            patternsToMatch: JSON.parse(this.matches)
         }
     },
     watch: {
-        match () {
-            this.patternToMatch = JSON.parse(this.match);
+        matches () {
+            this.patternsToMatch = JSON.parse(this.matches);
         }
 
     },
@@ -137,7 +137,7 @@ export default {
             
         },
         evaluateBoard(gameState){
-            const targetedBlocks = scanBoard(this.patternToMatch, gameState, gameState.length);
+            const targetedBlocks = scanBoard(this.patternsToMatch, gameState, gameState.length);
             return updatedBoard(targetedBlocks, gameState);
         }
     },

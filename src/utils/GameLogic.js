@@ -6,92 +6,403 @@ const Directions = {
     DOWN: 1
 }
 
-const patterns = [
-    [
-        [true, false], 
-        [false, true]
+const patterns = {
+    blocks_3: [
+        [
+            [true, false, false],
+            [false, true, false],
+            [false, false, true]
+        ],
+        [
+            [false, false, true],
+            [false, true, false],
+            [true, false, false]
+        ],
+        [
+            [true],
+            [true],
+            [true]
+        ],
+        [
+            [true, true, true],
+        ],
+        [
+            [true, false],
+            [true, true]
+        ],
+        [
+            [false, true],
+            [true, true]
+        ],
+        [
+            [true, true],
+            [false, true]
+        ],
+        [
+            [true, true],
+            [true, false]
+        ]
     ],
-    [
-        [false, true], 
-        [true, false]
+    blocks_4: [
+        [
+            [true, true],
+            [true, true]
+        ],
+        [
+            [false, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, false, false],
+            [true, true, true]
+        ],
+        [
+            [false, true, false],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, false]
+        ],
+        [
+            [true, true, true],
+            [false, true, false]
+        ],
+        [
+            [true, true, true, true]
+        ],
+        [
+            [true],
+            [true],
+            [true],
+            [true]
+        ]
     ],
-    [
-        [true, false], 
-        [true, true]
+    blocks_5: [
+        [
+            [true, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, true]
+        ],
+        [
+            [true, false, false],
+            [true, false, false],
+            [true, true, true]
+        ],
+        [
+            [false, false, true],
+            [false, false, true],
+            [true, true, true]
+        ],
+        [
+            [false, true, false],
+            [false, true, false],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, false],
+            [true, false, false]
+        ],
+        [
+            [true, true, true],
+            [false, false, true],
+            [false, false, true]
+        ],
+        [
+            [true, true, true],
+            [false, true, false],
+            [false, true, false]
+        ],
+        [
+            [true, false, false],
+            [true, true, true],
+            [true, false, false]
+        ],
+        [
+            [false, false, true],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [false, true, false],
+            [true, true, true],
+            [false, true, false]
+        ],
+        [
+            [true, false],
+            [true, false],
+            [true, false],
+            [true, true]
+        ],
+        [
+            [true, true],
+            [true, false],
+            [true, false],
+            [true, false]
+        ],
+        [
+            [false, true],
+            [false, true],
+            [false, true],
+            [true, true]
+        ],
+        [
+            [true, true],
+            [false, true],
+            [false, true],
+            [false, true]
+        ],
+        [
+            [true, false, false],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [false, false, true],
+            [true, true, true],
+            [true, false, false]
+        ],
+        [
+            [false, true, true],
+            [false, true, false],
+            [true, true, false]
+        ],
+        [
+            [true, true, false],
+            [false, true, false],
+            [false, true, true]
+        ]
     ],
-    [
-        [true, true], 
-        [true, true]
+    blocks_6: [
+        [
+            [true, false, false],
+            [true, true, false],
+            [true, true, true]
+        ],
+        [
+            [false, false, true],
+            [false, true, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, false],
+            [true, false, false]
+        ],
+        [
+            [true, true, true],
+            [false, true, true],
+            [false, false, true]
+        ],
+        [
+            [true, false, false],
+            [true, false, false],
+            [true, false, false],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, false],
+            [true, false, false],
+            [true, false, false]
+        ],
+        [
+            [false, false, true],
+            [false, false, true],
+            [false, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [false, false, true],
+            [false, false, true],
+            [false, false, true]
+        ],
+        [
+            [false, false, true],
+            [true, true, true],
+            [false, false, true],
+            [false, false, true]
+        ],
+        [
+            [false, false, true],
+            [false, false, true],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [true, false, false],
+            [true, true, true],
+            [true, false, false],
+            [true, false, false]
+        ],
+        [
+            [true, false, false],
+            [true, false, false],
+            [true, true, true],
+            [true, false, false]
+        ]
     ],
-    [
-        [true, true, true], 
-        [true, true, false]
+    blocks_7: [
+        [
+            [true, false, true],
+            [true, true, true],
+            [true, false, true]
+        ],
+        [
+            [true, true, true],
+            [false, true, false],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [false, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, false],
+            [true, true, true]
+        ],
+        [
+            [true, false, true],
+            [true, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, false, true],
+            [true, false, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, true],
+            [true, false, false]
+        ],
+        [
+            [true, true, true],
+            [true, true, false],
+            [true, true, false]
+        ],
+        [
+            [true, true, false],
+            [true, true, false],
+            [true, true, true]
+        ],
+        [
+            [true, false, false],
+            [true, true, true],
+            [true, true, true]
+        ],
+        [
+            [false, false, true],
+            [true, true, true],
+            [true, true, true]
+        ],
+        [
+            [false, true, true],
+            [false, true, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [false, true, true],
+            [false, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, true],
+            [false, true, false]
+        ],
+        [
+            [false, true, true],
+            [true, true, true],
+            [false, true, true]
+        ],
+        [
+            [false, true, false],
+            [true, true, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, false],
+            [true, true, true],
+            [true, true, false]
+        ]
     ],
-    [
-        [true, true, true], 
-        [false, true, true]
-    ],
-    [
-        [false, true, true], 
-        [true, true, true]
-    ],
-    [
-        [true, true, false], 
-        [true, true, true]
-    ],
-    [
-        [false, true, false], 
-        [true, true, true]
-    ],
-    [
-        [true, false, true], 
-        [true, true, true]
-    ],
-    [
-        [true, true, true], 
-        [true, true, true]
-    ],
-    [
-        [true, true, true], 
-        [true, true, true], 
-        [true, true, true]
-    ],
-    [
-        [true, true, true], 
-        [true, false, true], 
-        [true, true, true]
-    ],
-    [
-        [true, false, true], 
-        [true, true, true], 
-        [true, true, true]
-    ],
-    [
-        [true, false, true], 
-        [true, false, true], 
-        [true, true, true]
-    ],
-    [
-        [false, false, true], 
-        [false, false, true], 
-        [true, true, true]
-    ],
-    [
-        [true, false, false], 
-        [true, false, false], 
-        [true, true, true]
-    ],
-    [
-        [true, false, false], 
-        [true, true, false], 
-        [true, true, true]
-    ],
-    [
-        [false, false, true], 
-        [true, true, false], 
-        [true, true, true]
+    blocks_8: [
+        [
+            [true, true, true],
+            [true, false, true],
+            [true, true, true]
+        ],
+        [
+            [true, false, true],
+            [true, true, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, true],
+            [true, false, true]
+        ],
+        [
+            [true, true, true],
+            [false, true, true],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, false],
+            [true, true, true]
+        ],
+        [
+            [true, true, true],
+            [true, true, false],
+            [true, true, true]
+        ],
+        [
+            [false, true, true, true],
+            [false, true, true, false],
+            [true, true, true, false]
+        ],
+        [
+            [true, true, true, false],
+            [false, true, true, false],
+            [false, true, true, true]
+        ],
+        [
+            [true, false, false],
+            [true, true, true],
+            [true, true, true],
+            [false, false, true]
+        ],
+        [
+            [false, false, true],
+            [true, true, true],
+            [true, true, true],
+            [true, false, false]
+        ]
     ]
-]
+}
 
 function createLevel(difficulty, symbols) {
     return range(0, difficulty).map(index => symbols ? range(0, difficulty).map(item => `${item.toString()}-${index.toString()}`) : range(0, difficulty).map(item => `${item}`));
@@ -191,9 +502,18 @@ function cellsToRemove(row, column, pattern){
     return targetCells;
 }
 
-function scanBoard(pattern, structure, level){
-    const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
-    return uniq(list.map(item => JSON.stringify(item))).map(item => JSON.parse(item));
+function scanBoard(patterns, structure, level){
+    console.log(patterns);
+    let matches = [];
+    for(let i = 0; i < patterns.length; i++){
+        const pattern = patterns[i];
+        console.log(pattern);
+        const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
+        matches.push(list);
+    }
+    console.log(matches);
+    // const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
+    return uniq(flatten(matches).map(item => JSON.stringify(item))).map(item => JSON.parse(item));
 }
 
 function shouldRemoveBlock(targetedBlocks, row, column){

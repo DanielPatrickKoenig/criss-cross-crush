@@ -1,5 +1,5 @@
 <template>
-  <div style="width:60px;height:60px;">
+  <div style="width:20px;height:20px;">
       <div v-for="(row, r) in pattern" :key="r" :style="`width:100%;height:${100/size}%;display:flex;`">
           <div v-for="(block, b) in row" :key="`${r}-${b}`" :style="`box-shadow:0 0 0 1px #ffffff inset;width:${100/size}%;height:100%;background-color:${block ? '#000000' : 'transparent'}`" />
       </div>
