@@ -107,29 +107,28 @@ export default {
                 console.log(flattenedDropMatrix);
                 const space = (scope.boardSize.width - (scope.boardBorder * 2)) / scope.structure[0].length;
                 let removedBlocks = false;
-                let maxSpeed = 500
+                let highestShift = 0;
+                const dirationBase = 100;
                 for(let i = 0; i < scope.pieces.length; i++){
                     scope.pieces[i].children[1].removeChild(scope.pieces[i].children[1].children[0]);
                     scope.pieces[i].children[1].addChild(scope.createBGSquare(Number(flatBoard[i].split('-')[0]), space));
                     scope.pieces[i].status = flatBoard[i];
                     if(flattenedDropMatrix[i] !== 0){
-                        const previousPosition = scope.pieces[i].y;
-                        if(flattenedDropMatrix[i] > 0){
-                            scope.pieces[i].y -= space * flattenedDropMatrix[i];
+                        const shift = Math.abs(flattenedDropMatrix[i]);
+                        if(shift > highestShift){
+                            highestShift = shift;
                         }
-                        else {
-                            scope.pieces[i].y = scope.originPoint.y + (space * flattenedDropMatrix[i]);
-                        }
+                        scope.pieces[i].children[1].y = (shift * space) * -1;
                         // const targetProps = !foundFirst ? {y: previousPosition, onComplete: scope.updateGame, onCompleteParams: [scope, move]} : {y: previousPosition};
                         
-                        const targetProps = {y: previousPosition};
-                        TweenLite.to(scope.pieces[i], maxSpeed / 1000, targetProps);
+                        // const targetProps = {y: previousPosition};
+                        TweenLite.to(scope.pieces[i].children[1], shift * (dirationBase / 1000), {y: 0});
                         
                         removedBlocks = true;
                     }
                 }
                 if(removedBlocks){
-                    setTimeout(() => {scope.updateGame(scope, move)}, maxSpeed + 10);
+                    setTimeout(() => {scope.updateGame(scope, move)}, (highestShift * dirationBase) + 100);
                 }
                 
                 

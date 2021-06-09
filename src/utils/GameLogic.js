@@ -417,13 +417,7 @@ function randomizeStructure(structure){
     
 }
 function getPiecesByProperty(pieces, property, value){
-    let matches = [];
-    for(let i = 0; i < pieces.length; i++){
-        if(pieces[i][property] == value){
-            matches.push(pieces[i]);
-        }
-    }
-    return matches;
+    return pieces.filter(item => item[property] === value);
 }
 
 function checkForWin(structure, symbols){
@@ -503,17 +497,21 @@ function cellsToRemove(row, column, pattern){
 }
 
 function scanBoard(patterns, structure, level){
-    console.log(patterns);
+    // console.log(patterns);
     let matches = [];
     for(let i = 0; i < patterns.length; i++){
         const pattern = patterns[i];
-        console.log(pattern);
+        // console.log(pattern);
         const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
         matches.push(list);
     }
-    console.log(matches);
+    // console.log(matches);
     // const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
-    return uniq(flatten(matches).map(item => JSON.stringify(item))).map(item => JSON.parse(item));
+    const results = uniq(flatten(matches).map(item => JSON.stringify(item))).map(item => JSON.parse(item));
+    if(results.length > 0) {
+        console.log(results);
+    }
+    return results;
 }
 
 function shouldRemoveBlock(targetedBlocks, row, column){
