@@ -405,7 +405,10 @@ const patterns = {
 }
 
 function createLevel(difficulty, symbols) {
-    return range(0, difficulty).map(index => symbols ? range(0, difficulty).map(item => `${item.toString()}-${index.toString()}`) : range(0, difficulty).map(item => `${item}`));
+    return range(0, difficulty)
+        .map(index => symbols 
+            ? range(0, difficulty).map(item => `${item.toString()}-${index.toString()}`) 
+            : range(0, difficulty).map(item => `${item}`));
 }
 
 

@@ -47,7 +47,8 @@ export default {
             moving: false,
             tappedCell: {row: -1, column: -1},
             lastTapped: {row: -1, column: -1},
-            patternsToMatch: JSON.parse(this.matches)
+            patternsToMatch: JSON.parse(this.matches),
+            disabledRows: 0
         }
     },
     watch: {
@@ -64,9 +65,11 @@ export default {
         // },
         moveGroup (property, e, space) {
             // const group = getPiecesByProperty(this.pieces, direction, this.dragger[direction]);
-            const groupSize = property == 'x' ? this.pattern[0].length : this.pattern.length;
+            const rowDrop = property == 'y' ? this.disabledRows : 0;
+            const groupSize = property == 'x' ? this.pattern[0].length : this.pattern.length - rowDrop;
             // console.log(groupSize);
-            for(let i = 0; i < this.dragGroup.length; i++){
+            
+            for(let i = 0; i < this.dragGroup.length - rowDrop; i++){
                 this.dragGroup[i][property] = e[property] - this.offset[property] - this.dragOffsets[i][property];
                 if(this.dragGroup[i][property] > this.startCenters[groupSize - 1][property]){
                     // this.dragGroup[i][property] -= space * this.structure.length;
@@ -136,7 +139,9 @@ export default {
             
         },
         evaluateBoard(gameState){
-            const targetedBlocks = scanBoard(this.patternsToMatch, gameState, gameState.length);
+            console.log(gameState);
+            console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
+            const targetedBlocks = scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
             return updatedBoard(targetedBlocks, gameState);
         }
     },
@@ -218,11 +223,12 @@ export default {
                     if(this.dragDirection){
                         const sortProp = this.dragDirection == 'h' ? 'y' : 'x';
                         let dragPragPropertyList = [];
-                        for(let i = 0; i < this.dragGroup.length; i++){
+                        const rowDrop = sortProp == 'y' ? this.disabledRows : 0;
+                        for(let i = 0; i < this.dragGroup.length - rowDrop; i++){
                             dragPragPropertyList.push({x: this.dragGroup[i].x, y: this.dragGroup[i].y, status: this.dragGroup[i].status});
                         }
                         const sortedDragGroup = dragPragPropertyList.sort((a, b) => (a[sortProp] > b[sortProp]) ? 1 : -1);
-                        for(let i = 0; i < this.dragGroup.length; i++){
+                        for(let i = 0; i < this.dragGroup.length - rowDrop; i++){
                             this.dragGroup[i].status = sortedDragGroup[i].status;
                             // console.log(this.dragGroup[i].status);
                             this.dragGroup[i].x = this.startCenters[i].x - (space / 2);
