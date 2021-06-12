@@ -106,8 +106,11 @@ export default {
             if(move){
                 const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length));
                 const flatBoard = flatten(updatedBoard.updatedStructure);
+                // console.log(updatedBoard.dropMatrix);
+                // const augmentedDropMatrix = updatedBoard.dropMatrix.map(col => col.map(item => col.sort()[0] < 0 && item < 0 ? item = col.sort()[0] : item));
+                // console.log(augmentedDropMatrix);
                 const flattenedDropMatrix = flatten(updatedBoard.dropMatrix);
-                console.log(flattenedDropMatrix);
+                // console.log(flattenedDropMatrix);
                 const space = (scope.boardSize.width - (scope.boardBorder * 2)) / scope.structure[0].length;
                 let removedBlocks = false;
                 let highestShift = 0;
@@ -122,9 +125,6 @@ export default {
                             highestShift = shift;
                         }
                         scope.pieces[i].children[1].y = (shift * space) * -1;
-                        // const targetProps = !foundFirst ? {y: previousPosition, onComplete: scope.updateGame, onCompleteParams: [scope, move]} : {y: previousPosition};
-                        
-                        // const targetProps = {y: previousPosition};
                         TweenLite.to(scope.pieces[i].children[1], shift * (dirationBase / 1000), {y: 0});
                         
                         removedBlocks = true;
@@ -139,8 +139,8 @@ export default {
             
         },
         evaluateBoard(gameState){
-            console.log(gameState);
-            console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
+            // console.log(gameState);
+            // console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
             const targetedBlocks = scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
             return updatedBoard(targetedBlocks, gameState);
         }

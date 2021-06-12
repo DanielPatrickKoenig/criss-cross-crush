@@ -548,7 +548,9 @@ function getDropMatrix(targetedBlocks, structure){
         filteredMatrixRow.reverse();
         dropMatrix.push(filteredMatrixRow);
     }
-    return transposeAxis(dropMatrix);
+    console.log(dropMatrix);
+    return transposeAxis(dropMatrix.map(col => col.map(item => item < 0 ? item = col[0] : item)));
+    // return transposeAxis(dropMatrix);
 }
 
 function updatedBoard(targetedBlocks, structure){
