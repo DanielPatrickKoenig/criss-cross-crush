@@ -4,21 +4,26 @@
             <div style="display:flex;flex-wrap:wrap;"><button v-for="(group, key, i) in patterns" :key="i" @click="patternClicked(group)">{{key}}</button></div>
             <div style="display:flex;flex-wrap:wrap;">
                 <div
-                    v-for="(pattern, i) in acivePatterns" 
+                    v-for="(pattern, i) in activePatterns" 
                     :style="'margin:4px;'"
                     :key="i"
                 >
                     <PatternPerview 
+                        :style="{opacity: hasPattern(pattern) ? '1' : '.5'}"
                         :pattern="pattern"
                     />
                 </div>
             </div>
+            <div>moves: {{movesRemaining}}</div>
         </div>
         <SliderGame 
             v-if="selectedPattern" 
             :pattern="selectedPattern" 
             :loaded="hasSave"
             :matches="patternsToMatch"
+            :blocked="blockedRows"
+            @pattern-found="patternFound"
+            @move="moveMade"
             @updated="onUpdated"
         />
         <button @click="saving = true">save game</button>
@@ -64,6 +69,7 @@ import YesNoModal from '../components/YesNoModal.vue';
 import GameLoader from '../components/GameLoader.vue';
 import PatternPerview from '../components/PatternPreview.vue';
 import {mapState, mapActions} from 'vuex';
+import {uniq} from 'lodash';
 export default {
     components: {
         SliderGame,
@@ -88,14 +94,25 @@ export default {
             gameToLoad: {},
             saved: true,
             patterns,
-            acivePatterns: patterns.blocks_3
+            allActivePatterns: [...patterns.blocks_3, ...patterns.blocks_4],
+            patternsDisplayed: 6,
+            foundPatterns: [],
+            maxMoves: 10,
+            movesRemaining: 0,
+            blockedRows: 0
         }
     },
     computed: {
         ...mapState(['currentLevel', 'currentPattern', 'currentBadges', 'savedGames']),
-        patternsToMatch () {
-            return JSON.stringify(this.acivePatterns);
+        activePatterns () {
+            return this.allActivePatterns.filter((item, index) => index < this.patternsDisplayed);
         },
+        patternsToMatch () {
+            return JSON.stringify(this.activePatterns);
+        },
+        hasPattern () {
+            return pattern => this.foundPatterns.filter(item => JSON.stringify(item) === JSON.stringify(pattern)).length > 0
+        }
     },
     methods: {
         ...mapActions(['setGameData', 'hasSavedGame', 'loadGameData', 'saveGame']),
@@ -104,13 +121,22 @@ export default {
             this.acivePatterns = e;
         },
         onUpdated(e){
+            console.log(e);
             if(e.levelComplete){
                 alert('win');
                 this.level++;
             }
             this.saved = e.setup;
-            
+            this.cyclePatterns();
             this.setGameData({currentPattern: e.gameState, currentLevel: this.level, currentBadges: this.badges});
+        },
+        moveMade() {
+            this.movesRemaining--;
+            if(this.movesRemaining <= 0){
+                this.patternCheck();
+                this.movesRemaining = this.maxMoves;
+                this.cyclePatterns();
+            }
         },
         saveCurrentGame(){
             if(this.savedGames[this.gameName]){
@@ -151,9 +177,27 @@ export default {
             this.saved = true;
             this.gameName = '';
             this.showOverwriteWarning = false;
+        },
+        cyclePatterns () {
+            for(let i = 0; i < this.patternsDisplayed; i++){
+                const firtstPattern = this.allActivePatterns[0];
+                this.allActivePatterns.splice(0, 1);
+                this.allActivePatterns.push(firtstPattern);
+            }
+            this.foundPatterns = [];
+        },
+        patternFound(e){
+            this.foundPatterns.push(e);
+        },
+        patternCheck () {
+            const foundPatternLength = uniq(this.foundPatterns.map(item => JSON.stringify(item))).length;
+            if(foundPatternLength < this.patternsDisplayed){
+                this.blockedRows++;
+            }
         }
     },
     created(){
+        this.movesRemaining = this.maxMoves;
         this.loadGameData();
     },
     async mounted () {

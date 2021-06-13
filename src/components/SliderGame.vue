@@ -19,6 +19,10 @@ export default {
         matches: {
             type: String,
             required: true
+        },
+        blocked: {
+            type: Number,
+            default: 0
         }
     },
     data () {
@@ -48,12 +52,16 @@ export default {
             tappedCell: {row: -1, column: -1},
             lastTapped: {row: -1, column: -1},
             patternsToMatch: JSON.parse(this.matches),
-            disabledRows: 0
+            disabledRows: this.blocked,
+            piecesMatrix: []
         }
     },
     watch: {
         matches () {
             this.patternsToMatch = JSON.parse(this.matches);
+        },
+        blocked () {
+            this.disabledRows = this.blocked;
         }
 
     },
@@ -133,8 +141,11 @@ export default {
                 if(removedBlocks){
                     setTimeout(() => {scope.updateGame(scope, move)}, (highestShift * dirationBase) + 100);
                 }
-                
-                
+                else{
+                    if(this.piecesMatrix !== this.pieces.map(item => item.status).join(',')){
+                        this.$emit('move');
+                    }
+                }
             }
             
         },
@@ -142,7 +153,10 @@ export default {
             // console.log(gameState);
             // console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
             const targetedBlocks = scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
-            return updatedBoard(targetedBlocks, gameState);
+            for(let i = 0; i < targetedBlocks.foundPatterns.length; i++){
+                this.$emit('pattern-found', targetedBlocks.foundPatterns[i]);
+            }
+            return updatedBoard(targetedBlocks.results, gameState);
         }
     },
     mounted () {
@@ -194,6 +208,7 @@ export default {
                     this.dragDirection = null;
                     this.moving = false;
                     this.minimumMoveDistance = space / 2;
+                    this.piecesMatrix = this.pieces.map(item => item.status).join(',');
                 });
                 this.action.move(sprite, (e) => {
                     const canMove = Math.abs(this.downOrigin.x - e.x) > this.minimumMoveDistance || Math.abs(this.downOrigin.y - e.y) > this.minimumMoveDistance;

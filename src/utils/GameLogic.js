@@ -502,11 +502,16 @@ function cellsToRemove(row, column, pattern){
 function scanBoard(patterns, structure, level){
     // console.log(patterns);
     let matches = [];
+    let foundPatterns = [];
     for(let i = 0; i < patterns.length; i++){
         const pattern = patterns[i];
         // console.log(pattern);
         const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
+        if(list.length > 0){
+            foundPatterns.push(pattern);
+        }
         matches.push(list);
+
     }
     // console.log(matches);
     // const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
@@ -514,7 +519,7 @@ function scanBoard(patterns, structure, level){
     if(results.length > 0) {
         console.log(results);
     }
-    return results;
+    return { results, foundPatterns };
 }
 
 function shouldRemoveBlock(targetedBlocks, row, column){
