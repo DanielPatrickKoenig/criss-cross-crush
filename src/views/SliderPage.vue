@@ -1,7 +1,6 @@
 <template>
     <div class="game-page">
         <div>
-            <div style="display:flex;flex-wrap:wrap;"><button v-for="(group, key, i) in patterns" :key="i" @click="patternClicked(group)">{{key}}</button></div>
             <div style="display:flex;flex-wrap:wrap;">
                 <div
                     v-for="(pattern, i) in activePatterns" 

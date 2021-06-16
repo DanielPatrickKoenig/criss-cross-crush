@@ -53,7 +53,8 @@ export default {
             lastTapped: {row: -1, column: -1},
             patternsToMatch: JSON.parse(this.matches),
             disabledRows: this.blocked,
-            piecesMatrix: []
+            piecesMatrix: [],
+            disabledRowContainer: null
         }
     },
     watch: {
@@ -62,6 +63,7 @@ export default {
         },
         blocked () {
             this.disabledRows = this.blocked;
+            this.manageDisabledRowsDisplay((this.boardSize.width - (this.boardBorder * 2)) / this.structure[0].length);
         }
 
     },
@@ -125,7 +127,8 @@ export default {
                 const dirationBase = 100;
                 for(let i = 0; i < scope.pieces.length; i++){
                     scope.pieces[i].children[1].removeChild(scope.pieces[i].children[1].children[0]);
-                    scope.pieces[i].children[1].addChild(scope.createBGSquare(Number(flatBoard[i].split('-')[0]), space));
+                    scope.pieces[i].children[1].addChild(scope.createBGSquare(Number(flatBoard[i]), space));
+                    this.updateSymbol(scope.pieces[i].children[2], flatBoard[i]);
                     scope.pieces[i].status = flatBoard[i];
                     if(flattenedDropMatrix[i] !== 0){
                         const shift = Math.abs(flattenedDropMatrix[i]);
@@ -134,6 +137,8 @@ export default {
                         }
                         scope.pieces[i].children[1].y = (shift * space) * -1;
                         TweenLite.to(scope.pieces[i].children[1], shift * (dirationBase / 1000), {y: 0});
+                        scope.pieces[i].children[2].y = (shift * (space * 1.5)) * -1;
+                        TweenLite.to(scope.pieces[i].children[2], shift * (dirationBase / 1000), {y: space * .5});
                         
                         removedBlocks = true;
                     }
@@ -157,6 +162,42 @@ export default {
                 this.$emit('pattern-found', targetedBlocks.foundPatterns[i]);
             }
             return updatedBoard(targetedBlocks.results, gameState);
+        },
+        addSymbol (container, status, space) {
+            const text = this.utils.text(status, {fontSize: space / 2});
+            text.x = space / 2;
+            text.y = space / 2;
+            text.anchor.set(0.5);
+            container.addChild(text);
+        },
+        updateSymbol (item, status) {
+            item.text = status;
+        },
+        manageDisabledRowsDisplay (space) {
+            const noContainer = this.disabledRowContainer === null;
+            if(noContainer){
+                this.disabledRowContainer = this.utils.sprite();
+                this.instance.getApp().stage.addChild(this.disabledRowContainer);
+                this.disabledRowContainer.interactive = true;
+            }
+            for(let i = 0; i < this.structure.length; i++){
+                if(noContainer){
+                    const disabledRowOverlay = this.draw.rect({
+                        fill: 0xcccccc,
+                        fillOpacity: .5,
+                        width: space * this.structure.length,
+                        height: space
+                    });
+                    this.disabledRowContainer.addChild(disabledRowOverlay);
+                    disabledRowOverlay.x = this.originPoint.x;
+                    disabledRowOverlay.y = this.originPoint.y + (space * this.structure.length) - ((i + 1) * space);
+                }
+                // this.disabledRowContainer.children[i].interactive = this.disabledRows > i;
+                // console.log(disabledRows)
+                this.disabledRowContainer.children[i].visible = this.disabledRows > i;
+                
+
+            }
         }
     },
     mounted () {
@@ -181,15 +222,10 @@ export default {
                 // const full = this.draw.rect({fill: 0x000000, fillOpacity: .06, strokeWidth: 2, strokeOpacity: 0, stroke: 0xffffff, width: space - (inset * 2), height: space - (inset * 2), x: inset, y: inset});
                 sprite.addChild(full);
                 const bgContainer = this.utils.sprite();
-                bgContainer.addChild(this.createBGSquare(Number(this.structure[i][j].split('-')[0]), space));
+                bgContainer.addChild(this.createBGSquare(Number(this.structure[i][j]), space));
                 sprite.addChild(bgContainer);
-                if(this.structure[i][j].split('-').length > 1){
-                    const text = this.utils.text(this.structure[i][j].split('-')[1], {fontSize: space / 2});
-                    text.x = space / 2;
-                    text.y = space / 2;
-                    text.anchor.set(0.5);
-                    sprite.addChild(text);
-                }
+                
+                this.addSymbol(sprite, this.structure[i][j], space);
                 
                 full.visible = this.structure[i][j] != 0 && this.structure[i][j] != ' ';
                 this.pieces.push(sprite);
@@ -250,10 +286,9 @@ export default {
                             this.dragGroup[i].y = this.startCenters[i].y - (space / 2);
                             const full = this.dragGroup[i].children[1];
                             this.dragGroup[i].children[1].removeChild(this.dragGroup[i].children[1].children[0]);
-                            this.dragGroup[i].children[1].addChild(this.createBGSquare(Number(this.dragGroup[i].status.split('-')[0]), space));
-                            if(this.dragGroup[i].status.split('-').length > 1){
-                                this.dragGroup[i].children[2].text = this.dragGroup[i].status.split('-')[1];
-                            }
+                            this.dragGroup[i].children[1].addChild(this.createBGSquare(Number(this.dragGroup[i].status), space));
+                            
+                            this.updateSymbol(this.dragGroup[i].children[2], this.dragGroup[i].status);
                             
                             full.visible = this.dragGroup[i].status == 1 || this.dragGroup[i].status != ' ';
                         }
@@ -264,7 +299,10 @@ export default {
             }
             v++;
         }
+        this.manageDisabledRowsDisplay(space);
+
         this.updateGame(this);
+
         
     }
 }
