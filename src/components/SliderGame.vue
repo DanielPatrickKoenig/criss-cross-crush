@@ -54,7 +54,8 @@ export default {
             patternsToMatch: JSON.parse(this.matches),
             disabledRows: this.blocked,
             piecesMatrix: [],
-            disabledRowContainer: null
+            disabledRowContainer: null,
+            patternCountOnTurn: 0
         }
     },
     watch: {
@@ -161,7 +162,8 @@ export default {
             for(let i = 0; i < targetedBlocks.foundPatterns.length; i++){
                 this.$emit('pattern-found', targetedBlocks.foundPatterns[i]);
             }
-            return updatedBoard(targetedBlocks.results, gameState);
+            this.patternCountOnTurn += targetedBlocks.foundPatterns.length;
+            return updatedBoard(targetedBlocks.results, gameState, Math.floor(this.patternCountOnTurn / 4));
         },
         addSymbol (container, status, space) {
             const text = this.utils.text(status, {fontSize: space / 2});
@@ -236,6 +238,7 @@ export default {
                 sprite.status = this.structure[i][j];
                 this.instance.getApp().stage.addChild(sprite);
                 this.action.down(sprite, (e) => {
+                    this.patternCountOnTurn = 0;
                     this.dragger = sprite;
                     this.downOrigin = e;
                     this.offset = {x: e.x - sprite.x, y: e.y - sprite.y};
@@ -291,6 +294,11 @@ export default {
                             this.updateSymbol(this.dragGroup[i].children[2], this.dragGroup[i].status);
                             
                             full.visible = this.dragGroup[i].status == 1 || this.dragGroup[i].status != ' ';
+                        }
+                    }
+                    else{
+                        if(sprite.status === '!'){
+                            console.log('bomb clicked !!!!!!')
                         }
                     }
                     this.updateGame(this, true);

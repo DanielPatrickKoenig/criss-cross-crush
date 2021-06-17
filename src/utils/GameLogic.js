@@ -558,14 +558,25 @@ function getDropMatrix(targetedBlocks, structure){
     // return transposeAxis(dropMatrix);
 }
 
-function updatedBoard(targetedBlocks, structure){
+function updatedBoard(targetedBlocks, structure, bombs = 0){
     let transposed = transposeAxis(structure);
     const dropMatrix = getDropMatrix(targetedBlocks, transposed);
     let filteredTransposed = transposed.map((item1, index1) => item1.filter((item2, index2) => !shouldRemoveBlock(targetedBlocks, index2, index1)));
     let removals = filteredTransposed.map(item => structure.length - item.length);
+    let bombIndexes = [];
+    if(bombs){
+        let bombChances = removals.map(item => item * 0);
+        for(let i = 0; i < bombs; i++){
+            const bombIndex = Math.floor(Math.random() * bombChances.length);
+            bombIndexes.push(bombIndex);
+            bombChances.splice(bombIndex, 1);
+        }
+    }
     for (let i = 0; i < removals.length; i++) {
+        const subIndex = bombIndexes.includes(i) ? Math.floor(Math.random() * removals[i]) : -1;
         for(let j = 0; j < removals[i]; j++) {
-            filteredTransposed[i].splice(0, 0, Math.floor(Math.random() * removals.length).toString());
+            const value = subIndex === j ? '!' : Math.floor(Math.random() * removals.length).toString();
+            filteredTransposed[i].splice(0, 0, value);
         }
     }
     return {updatedStructure: transposeAxis(filteredTransposed), dropMatrix};
