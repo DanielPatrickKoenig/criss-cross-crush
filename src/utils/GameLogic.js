@@ -499,23 +499,26 @@ function cellsToRemove(row, column, pattern){
     return targetCells;
 }
 
-function activateBomb(row, column, structure, disabledRows){
+function activateBomb(row, column, structure, disabledRows, unlocking){
     console.log(structure);
     let destroyedBlocks = [{row, column}];
-    destroyedBlocks.push({row: row - 1, column: column - 1});
-    destroyedBlocks.push({row: row, column: column - 1});
-    destroyedBlocks.push({row: row + 1, column: column - 1});
-    destroyedBlocks.push({row: row + 1, column: column});
-    destroyedBlocks.push({row: row + 1, column: column + 1});
-    destroyedBlocks.push({row: row, column: column + 1});
-    destroyedBlocks.push({row: row - 1, column: column + 1});
-    destroyedBlocks.push({row: row - 1, column: column});
-    const results = destroyedBlocks.filter(item => 
-        item.row >= 0 && 
-        item.row < structure.length - disabledRows && 
-        item.column >= 0 && 
-        item.column < structure[0].length
-    );
+    let results = destroyedBlocks;
+    if(!unlocking){
+        destroyedBlocks.push({row: row - 1, column: column - 1});
+        destroyedBlocks.push({row: row, column: column - 1});
+        destroyedBlocks.push({row: row + 1, column: column - 1});
+        destroyedBlocks.push({row: row + 1, column: column});
+        destroyedBlocks.push({row: row + 1, column: column + 1});
+        destroyedBlocks.push({row: row, column: column + 1});
+        destroyedBlocks.push({row: row - 1, column: column + 1});
+        destroyedBlocks.push({row: row - 1, column: column});
+        results = destroyedBlocks.filter(item => 
+            item.row >= 0 && 
+            item.row < structure.length - disabledRows && 
+            item.column >= 0 && 
+            item.column < structure[0].length
+        );
+    }
     return { results, foundPatterns: [] };
 }
 

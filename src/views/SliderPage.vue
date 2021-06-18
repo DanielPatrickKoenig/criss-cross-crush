@@ -23,6 +23,7 @@
             :blocked="blockedRows"
             @pattern-found="patternFound"
             @move="moveMade"
+            @unblock="onUnblocked"
             @updated="onUpdated"
         />
         <button @click="saving = true">save game</button>
@@ -136,6 +137,13 @@ export default {
                 this.movesRemaining = this.maxMoves;
                 this.cyclePatterns();
             }
+            else{
+                const foundPatternLength = uniq(this.foundPatterns.map(item => JSON.stringify(item))).length;
+                if(foundPatternLength === this.activePatterns.length){
+                    this.movesRemaining = this.maxMoves;
+                    this.cyclePatterns();
+                }
+            }
         },
         saveCurrentGame(){
             if(this.savedGames[this.gameName]){
@@ -192,6 +200,11 @@ export default {
             const foundPatternLength = uniq(this.foundPatterns.map(item => JSON.stringify(item))).length;
             if(foundPatternLength < this.patternsDisplayed){
                 this.blockedRows++;
+            }
+        },
+        onUnblocked () {
+            if(this.blockedRows > 0){
+                this.blockedRows--;
             }
         }
     },

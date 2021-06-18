@@ -114,14 +114,14 @@ export default {
         createBGSquare(index, space){
             return this.draw.rect({fill: this.colors[index], fillOpacity: 1, strokeWidth: 0, strokeOpacity: 0, stroke: 0xffffff, width: space, height: space, x: 0, y: 0})
         },
-        updateGame(scope, move, bombLocation = null){
+        updateGame(scope, move, bombLocation = null, unlocking = false){
             // const pieceStatus = this.pieces.map(piece => piece.status);
             // const gameState = reshape(pieceStatus, this.structure.length);
             // const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
             // this.$emit('updated', {gameState, setup: !move});
             if(move){
                 this.resolvingMove = true;
-                const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length), bombLocation);
+                const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length), bombLocation, unlocking);
                 const flatBoard = flatten(updatedBoard.updatedStructure);
                 // console.log(updatedBoard.dropMatrix);
                 // const augmentedDropMatrix = updatedBoard.dropMatrix.map(col => col.map(item => col.sort()[0] < 0 && item < 0 ? item = col.sort()[0] : item));
@@ -162,12 +162,12 @@ export default {
             }
             
         },
-        evaluateBoard(gameState, bombLocation){
+        evaluateBoard(gameState, bombLocation, unlocking){
             // console.log(gameState);
             // console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
             const targetedBlocks = bombLocation ?
                 activateBomb(bombLocation.y, bombLocation.x, this.structure, this.disabledRows) : 
-                scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
+                scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length, unlocking);
             console.log(targetedBlocks);
             for(let i = 0; i < targetedBlocks.foundPatterns.length; i++){
                 this.$emit('pattern-found', targetedBlocks.foundPatterns[i]);
@@ -310,7 +310,14 @@ export default {
                         if(sprite.status === '!'){
                             console.log('bomb clicked !!!!!!');
                             console.log({x: sprite.h, y: sprite.v});
-                            this.updateGame(this, true, {x: sprite.h, y: sprite.v}, this.disabledRows);
+
+                            if(this.disabledRows && sprite.v === (this.structure.length - 1) - this.disabledRows){
+                                this.$emit('unblock');
+                                this.updateGame(this, true, {x: sprite.h, y: sprite.v}, this.disabledRows, true);
+                            }
+                            else{
+                                this.updateGame(this, true, {x: sprite.h, y: sprite.v}, this.disabledRows);
+                            }
                         }
                     }
                     this.updateGame(this, true);
