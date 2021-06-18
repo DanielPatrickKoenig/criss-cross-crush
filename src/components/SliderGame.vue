@@ -1,12 +1,16 @@
 <template>
   <div class="board">
-      <canvas ref="pixiTarget" style="max-width:100%;" />
+      <canvas 
+        :style="resolvingMove ? { 'pointer-events': 'none', opacity: .5 } : {}"
+        ref="pixiTarget" 
+        style="max-width:100%;" 
+    />
   </div>
 </template>
 
 <script>
 import {PixiInstance, PixiDraw, PixiUtils, PixiAction} from '../utils/PixiManager.js';
-import {getPiecesByProperty, randomizeStructure, scanBoard, updatedBoard} from '../utils/GameLogic.js';
+import {getPiecesByProperty, randomizeStructure, scanBoard, updatedBoard, activateBomb} from '../utils/GameLogic.js';
 import {flatten, reshape} from '../utils/Utilities.js';
 import {TweenLite} from 'gsap';
 export default {
@@ -55,7 +59,8 @@ export default {
             disabledRows: this.blocked,
             piecesMatrix: [],
             disabledRowContainer: null,
-            patternCountOnTurn: 0
+            patternCountOnTurn: 0,
+            resolvingMove: false
         }
     },
     watch: {
@@ -109,13 +114,14 @@ export default {
         createBGSquare(index, space){
             return this.draw.rect({fill: this.colors[index], fillOpacity: 1, strokeWidth: 0, strokeOpacity: 0, stroke: 0xffffff, width: space, height: space, x: 0, y: 0})
         },
-        updateGame(scope, move){
+        updateGame(scope, move, bombLocation = null){
             // const pieceStatus = this.pieces.map(piece => piece.status);
             // const gameState = reshape(pieceStatus, this.structure.length);
             // const levelComplete = levelCheck && checkForWin(gameState, this.structure[0][0].split('-').length > 1);
             // this.$emit('updated', {gameState, setup: !move});
             if(move){
-                const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length));
+                this.resolvingMove = true;
+                const updatedBoard = scope.evaluateBoard(reshape(scope.pieces.map(piece => piece.status), scope.structure.length), bombLocation);
                 const flatBoard = flatten(updatedBoard.updatedStructure);
                 // console.log(updatedBoard.dropMatrix);
                 // const augmentedDropMatrix = updatedBoard.dropMatrix.map(col => col.map(item => col.sort()[0] < 0 && item < 0 ? item = col.sort()[0] : item));
@@ -138,7 +144,7 @@ export default {
                         }
                         scope.pieces[i].children[1].y = (shift * space) * -1;
                         TweenLite.to(scope.pieces[i].children[1], shift * (dirationBase / 1000), {y: 0});
-                        scope.pieces[i].children[2].y = (shift * (space * 1.5)) * -1;
+                        scope.pieces[i].children[2].y = scope.pieces[i].children[1].y + (space * .5);
                         TweenLite.to(scope.pieces[i].children[2], shift * (dirationBase / 1000), {y: space * .5});
                         
                         removedBlocks = true;
@@ -151,14 +157,18 @@ export default {
                     if(this.piecesMatrix !== this.pieces.map(item => item.status).join(',')){
                         this.$emit('move');
                     }
+                    this.resolvingMove = false;
                 }
             }
             
         },
-        evaluateBoard(gameState){
+        evaluateBoard(gameState, bombLocation){
             // console.log(gameState);
             // console.log(gameState.map((item, index) => index > this.structure.length - this.disabledRows ? item.map(item => (item * 0) - 1) : item));
-            const targetedBlocks = scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
+            const targetedBlocks = bombLocation ?
+                activateBomb(bombLocation.y, bombLocation.x, this.structure, this.disabledRows) : 
+                scanBoard(this.patternsToMatch, gameState.map((item, index) => index > this.structure.length - (this.disabledRows + 1) ? item.map(innerItem => (innerItem * 0) - 1) : item), gameState.length);
+            console.log(targetedBlocks);
             for(let i = 0; i < targetedBlocks.foundPatterns.length; i++){
                 this.$emit('pattern-found', targetedBlocks.foundPatterns[i]);
             }
@@ -298,7 +308,9 @@ export default {
                     }
                     else{
                         if(sprite.status === '!'){
-                            console.log('bomb clicked !!!!!!')
+                            console.log('bomb clicked !!!!!!');
+                            console.log({x: sprite.h, y: sprite.v});
+                            this.updateGame(this, true, {x: sprite.h, y: sprite.v}, this.disabledRows);
                         }
                     }
                     this.updateGame(this, true);

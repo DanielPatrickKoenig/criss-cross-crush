@@ -499,6 +499,26 @@ function cellsToRemove(row, column, pattern){
     return targetCells;
 }
 
+function activateBomb(row, column, structure, disabledRows){
+    console.log(structure);
+    let destroyedBlocks = [{row, column}];
+    destroyedBlocks.push({row: row - 1, column: column - 1});
+    destroyedBlocks.push({row: row, column: column - 1});
+    destroyedBlocks.push({row: row + 1, column: column - 1});
+    destroyedBlocks.push({row: row + 1, column: column});
+    destroyedBlocks.push({row: row + 1, column: column + 1});
+    destroyedBlocks.push({row: row, column: column + 1});
+    destroyedBlocks.push({row: row - 1, column: column + 1});
+    destroyedBlocks.push({row: row - 1, column: column});
+    const results = destroyedBlocks.filter(item => 
+        item.row >= 0 && 
+        item.row < structure.length - disabledRows && 
+        item.column >= 0 && 
+        item.column < structure[0].length
+    );
+    return { results, foundPatterns: [] };
+}
+
 function scanBoard(patterns, structure, level){
     // console.log(patterns);
     let matches = [];
@@ -517,7 +537,9 @@ function scanBoard(patterns, structure, level){
     // const list = flatten(flatten([...Array(level).keys()].map(item => findPattern(pattern, structure, item.toString()))));
     const results = uniq(flatten(matches).map(item => JSON.stringify(item))).map(item => JSON.parse(item));
     if(results.length > 0) {
+        console.log('--------------- results ----------------');
         console.log(results);
+        console.log(foundPatterns);
     }
     return { results, foundPatterns };
 }
@@ -582,4 +604,4 @@ function updatedBoard(targetedBlocks, structure, bombs = 0){
     return {updatedStructure: transposeAxis(filteredTransposed), dropMatrix};
 }
 
-export {getPiecesByProperty, randomizeStructure, Directions, createLevel, checkForWin, scanBoard, updatedBoard, patterns};
+export {getPiecesByProperty, randomizeStructure, Directions, createLevel, checkForWin, scanBoard, updatedBoard, patterns, activateBomb};
